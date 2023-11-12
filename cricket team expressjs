@@ -1,15 +1,107 @@
-// app.js
+app.js
 
 const express = require("express");
+
 const app = express();
+
 module.exports = app;
 
-// Other configurations or middleware setups could go here
-
-// Assuming there's a port defined
 const PORT = 3000;
 
-// Listen to the defined port
 app.listen(PORT, () => {
+
   console.log(`Server is running on port ${PORT}`);
+
+});
+
+
+
+
+
+result.js
+
+const app = require("./app");
+
+const path = require("path");
+
+const { open } = require("sqlite");
+
+const sqlite3 = require("sqlite3");
+
+const dbPath = path.join(__dirname, "goodreads.db");
+
+let db = null;
+
+
+
+const initializeDBAndServer = async () => {
+
+  try {
+
+    db = await open({
+
+      filename: dbPath,
+
+      driver: sqlite3.Database,
+
+    });
+
+  } catch (e) {
+
+    console.log(`${e.message}`);
+
+    process.exit(1);
+
+  }
+
+};
+
+
+
+initializeDBAndServer();
+
+
+
+app.get("/players/", async (req, res) => {
+
+  const getCricket = `SELECT * FROM cricket`;
+
+  const dbArray = await db.all(getCricket);
+
+  res.send(dbArray);
+
+});
+
+
+
+app.get("/players/:playerId/", async (req, res) => {
+
+  const { playerId } = req.params;
+
+  const getCricket2 = `SELECT * FROM cricket WHERE playerId=${playerId}`;
+
+  const daArray2 = await db.get(getCricket2);
+
+  res.send(daArray2);
+
+});
+
+app.use(express.json());
+
+app.post("/players/",(req,res)=>{
+
+    const content=req.body;
+
+    const {player_id,player_name,jersey_number,role}=content;
+
+    const addQuery=`INSERT INTO cricket_team (player_id,player_name,jersey_number,role)
+
+    VALUES (${player_id},${player_name},${jersey_number},${role})`;
+
+    const dbResponse=await db.run(addQuery);
+
+    const teamId=dbResponse.lastID;
+
+    response.send(`Player Added to Team`);
+
 });
